@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  bookings Booking[]
+
+  @@map("users")
+}
+
+model Barbershop {
+  id          String   @id @default(uuid())
+  name        String
+  address     String
+  phones      String[]
+  description String
+  imageUrl    String   @map("image_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  services BarbershopService[]
+
+  @@map("barbershops")
+}
+
+model BarbershopService {
+  id           String  @id @default(uuid())
+  barbershopId String  @map("barbershop_id")
+  name         String
+  description  String
+  imageUrl     String  @map("image_url")
+  price        Decimal @db.Decimal(10, 2)
+
+  barbershop Barbershop @relation(fields: [barbershopId], references: [id])
+  bookings   Booking[]
+
+  @@map("barbershop_services")
+}
+
+model Booking {
+  id                  String   @id @default(uuid())
+  userId              String   @map("user_id")
+  barbershopServiceId String   @map("barbershop_service_id")
+  date                DateTime
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user              User              @relation(fields: [userId], references: [id])
+  barbershopService BarbershopService @relation(fields: [barbershopServiceId], references: [id])
+
+  @@map("bookings")
+}
