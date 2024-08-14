@@ -4,6 +4,7 @@ import './globals.css';
 
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
+import { Toaster } from '@/components/ui/sonner';
 
 const nunito = Nunito({ subsets: ['latin'] });
 
@@ -25,6 +26,8 @@ export default function RootLayout({
         {children}
 
         <Footer />
+
+        <Toaster />
       </body>
     </html>
   );

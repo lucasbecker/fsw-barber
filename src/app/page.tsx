@@ -52,16 +52,15 @@ export default async function Home() {
           <Image
             alt="Agende nos melhores com FSW Barber"
             src="/banner.png"
-            fill
             className="object-cover"
+            priority
+            fill
           />
         </div>
       </section>
 
       <section>
-        <h3 className="text-xs font-bold uppercase text-muted-foreground">
-          Agendamentos
-        </h3>
+        <h3>Agendamentos</h3>
 
         <Card>
           <CardContent className="flex p-0">
@@ -94,9 +93,7 @@ export default async function Home() {
       </section>
 
       <section className="px-0">
-        <h3 className="px-5 text-xs font-bold uppercase text-muted-foreground">
-          Recomendados
-        </h3>
+        <h3 className="px-5">Recomendados</h3>
 
         <div className="flex gap-4 overflow-auto px-5 [&::-webkit-scrollbar]:hidden">
           {barbershops.map((barbershop) => (
@@ -106,9 +103,7 @@ export default async function Home() {
       </section>
 
       <section className="px-0">
-        <h3 className="px-5 text-xs font-bold uppercase text-muted-foreground">
-          Populares
-        </h3>
+        <h3 className="px-5">Populares</h3>
 
         <div className="flex gap-4 overflow-auto px-5 [&::-webkit-scrollbar]:hidden">
           {barbershops.map((barbershop) => (

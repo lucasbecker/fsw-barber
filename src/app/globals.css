@@ -70,4 +70,8 @@
   section {
     @apply flex flex-col gap-3 p-5;
   }
+
+  section h3 {
+    @apply text-xs font-bold uppercase text-muted-foreground;
+  }
 }

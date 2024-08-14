@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Image from 'next/image';
 import { StarIcon } from 'lucide-react';
 
@@ -23,6 +24,8 @@ export function BarbershopCard({ data }: BarbershopCardProps) {
             className="object-cover"
             src={data.imageUrl}
             alt={data.name}
+            quality={100}
+            sizes="33vw"
             fill
           />
         </div>
@@ -41,8 +44,8 @@ export function BarbershopCard({ data }: BarbershopCardProps) {
             </address>
           </div>
 
-          <Button variant="secondary" className="rounded-lg">
-            Reservar
+          <Button variant="secondary" className="rounded-lg" asChild>
+            <Link href={`/barbershops/${data.id}`}>Reservar</Link>
           </Button>
         </div>
       </CardContent>
