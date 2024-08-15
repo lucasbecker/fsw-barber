@@ -63,8 +63,21 @@
   * {
     @apply border-border antialiased;
   }
+
+  *::-webkit-scrollbar {
+    @apply h-2 w-2 rounded bg-transparent;
+  }
+
+  *::-webkit-scrollbar-track {
+    @apply rounded bg-transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply rounded bg-border;
+  }
+
   body {
-    @apply flex min-h-dvh flex-col bg-background text-foreground;
+    @apply flex min-h-dvh flex-col overflow-x-hidden bg-background text-foreground;
   }
 
   main {
