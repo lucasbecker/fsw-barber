@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { PropsWithChildren, useState } from 'react';
+import { PropsWithChildren } from 'react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import {
   CalendarIcon,
   HomeIcon,
@@ -21,14 +22,27 @@ import {
   SheetTitle,
   SheetTrigger,
 } from './ui/sheet';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTrigger,
+} from './ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
 
-type DrawerProps = {} & PropsWithChildren;
+export function Drawer({ children }: PropsWithChildren) {
+  const { data } = useSession();
 
-export function Drawer({ children }: DrawerProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  async function handleLoginWithGoogle() {
+    await signIn('google');
+  }
+
+  async function handleLogout() {
+    await signOut();
+  }
 
   return (
     <Sheet>
@@ -43,28 +57,44 @@ export function Drawer({ children }: DrawerProps) {
         </SheetHeader>
 
         <div className="flex flex-col gap-6 py-6">
-          {isAuthenticated ? (
+          {data?.user ? (
             <div className="flex items-center gap-3">
               <Avatar className="size-12 border-2 border-primary">
-                <AvatarImage src="https://github.com/lucasbecker.png" />
-                <AvatarFallback>LB</AvatarFallback>
+                <AvatarImage src={data.user.image ?? undefined} />
+                <AvatarFallback>{data.user.name}</AvatarFallback>
               </Avatar>
 
               <div>
-                <p className="font-bold">Lucas Becker</p>
+                <p className="font-bold">{data.user.name}</p>
 
                 <span className="truncate text-sm text-muted-foreground">
-                  lucasbeckerfelisberto@gmail.com
+                  {data.user.email}
                 </span>
               </div>
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <p className="text-lg">Olá, faça seu login!</p>
+              <p className="text-lg font-bold">Olá, faça seu login!</p>
 
-              <Button size="icon" onClick={() => setIsAuthenticated(true)}>
-                <LogInIcon className="size-5" />
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="icon">
+                    <LogInIcon className="size-5" />
+                  </Button>
+                </DialogTrigger>
+
+                <DialogContent className="w-10/12 rounded-xl">
+                  <DialogHeader>Faça login na plataforma</DialogHeader>
+
+                  <DialogDescription className="text-center">
+                    Conecte-se usando sua conta do Google.
+                  </DialogDescription>
+
+                  <Button className="font-bold" onClick={handleLoginWithGoogle}>
+                    Google
+                  </Button>
+                </DialogContent>
+              </Dialog>
             </div>
           )}
 
@@ -117,12 +147,12 @@ export function Drawer({ children }: DrawerProps) {
             ))}
           </div>
 
-          {isAuthenticated && (
+          {data?.user && (
             <>
               <Separator />
 
               <Button
-                onClick={() => setIsAuthenticated(false)}
+                onClick={handleLogout}
                 className="justify-start gap-2"
                 variant="ghost"
                 size="lg"

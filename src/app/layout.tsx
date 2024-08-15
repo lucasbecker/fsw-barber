@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { Nunito } from 'next/font/google';
 import './globals.css';
 
+import { AuthProvider } from '@/providers/auth';
+import { Toaster } from '@/components/ui/sonner';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { Toaster } from '@/components/ui/sonner';
 
 const nunito = Nunito({ subsets: ['latin'] });
 
@@ -21,13 +22,15 @@ export default function RootLayout({
   return (
     <html lang="pt-br" className="dark">
       <body className={nunito.className}>
-        <Header />
+        <AuthProvider>
+          <Header />
 
-        {children}
+          {children}
 
-        <Footer />
+          <Footer />
 
-        <Toaster />
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
