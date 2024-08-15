@@ -14,7 +14,7 @@ type BarbershopCardProps = {
 
 export function BarbershopCard({ data }: BarbershopCardProps) {
   return (
-    <Card className="min-w-44 max-w-44 rounded-2xl">
+    <Card className="min-w-44 rounded-2xl">
       <CardContent className="p-1">
         <div className="relative aspect-square w-full overflow-hidden rounded-xl">
           <Badge variant="secondary" className="absolute left-2 top-2 z-10">

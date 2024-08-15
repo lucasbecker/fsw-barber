@@ -64,7 +64,11 @@
     @apply border-border antialiased;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply flex min-h-dvh flex-col bg-background text-foreground;
+  }
+
+  main {
+    @apply flex-1;
   }
 
   section {
