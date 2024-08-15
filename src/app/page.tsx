@@ -1,15 +1,14 @@
 import Image from 'next/image';
-import { SearchIcon } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
 import { QUICK_SEARCH_OPTIONS } from '@/constants/quick-search';
 import { BarbershopCard } from '@/components/barbershop-card';
+import { Search } from '@/components/search';
 import { db } from '@/lib/prisma';
 
 export default async function Home() {
@@ -23,13 +22,7 @@ export default async function Home() {
           <span className="text-muted-foreground">Segunda, 5 de Agosto</span>
         </div>
 
-        <form className="flex items-center gap-2 px-5">
-          <Input placeholder="Search" />
-
-          <Button size="icon" variant="secondary">
-            <SearchIcon className="size-5" />
-          </Button>
-        </form>
+        <Search className="px-5" />
 
         <div className="flex gap-3 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden">
           {QUICK_SEARCH_OPTIONS.map((option) => (
