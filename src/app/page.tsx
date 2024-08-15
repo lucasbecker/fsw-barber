@@ -10,6 +10,7 @@ import { QUICK_SEARCH_OPTIONS } from '@/constants/quick-search';
 import { BarbershopCard } from '@/components/barbershop-card';
 import { Search } from '@/components/search';
 import { db } from '@/lib/prisma';
+import Link from 'next/link';
 
 export default async function Home() {
   const barbershops = await db.barbershop.findMany({});
@@ -26,15 +27,22 @@ export default async function Home() {
 
         <div className="flex gap-3 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden">
           {QUICK_SEARCH_OPTIONS.map((option) => (
-            <Button variant="secondary" key={option.title} className="gap-2">
-              <Image
-                src={option.imageUrl}
-                alt={option.title}
-                height={16}
-                width={16}
-              />
+            <Button
+              asChild
+              key={option.title}
+              variant="secondary"
+              className="gap-2"
+            >
+              <Link href={`/barbershops?search=${option.title}`}>
+                <Image
+                  src={option.imageUrl}
+                  alt={option.title}
+                  height={16}
+                  width={16}
+                />
 
-              {option.title}
+                {option.title}
+              </Link>
             </Button>
           ))}
         </div>

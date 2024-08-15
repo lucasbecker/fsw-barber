@@ -120,30 +120,43 @@ export function Drawer({ children }: PropsWithChildren) {
               Agendamentos
             </Button>
 
-            <Button className="justify-start gap-2" variant="ghost" size="lg">
-              <ScissorsIcon className="size-5" />
-              Barbearias
-            </Button>
+            <SheetClose asChild>
+              <Button
+                asChild
+                size="lg"
+                variant="ghost"
+                className="justify-start gap-2"
+              >
+                <Link href="/barbershops">
+                  <ScissorsIcon className="size-5" />
+                  Barbearias
+                </Link>
+              </Button>
+            </SheetClose>
           </div>
 
           <Separator />
 
           <div className="flex flex-col gap-1">
             {QUICK_SEARCH_OPTIONS.map((option) => (
-              <Button
-                key={option.title}
-                className="justify-start gap-2"
-                variant="ghost"
-                size="lg"
-              >
-                <Image
-                  src={option.imageUrl}
-                  alt={option.title}
-                  height={20}
-                  width={20}
-                />
-                {option.title}
-              </Button>
+              <SheetClose asChild key={option.title}>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="ghost"
+                  className="justify-start gap-2"
+                >
+                  <Link href={`/barbershops?search=${option.title}`}>
+                    <Image
+                      src={option.imageUrl}
+                      alt={option.title}
+                      height={20}
+                      width={20}
+                    />
+                    {option.title}
+                  </Link>
+                </Button>
+              </SheetClose>
             ))}
           </div>
 
