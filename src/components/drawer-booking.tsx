@@ -1,13 +1,14 @@
 'use client';
 
-import { PropsWithChildren, useState } from 'react';
+import { PropsWithChildren, useEffect, useState } from 'react';
 import { format, set } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import { ptBR } from 'date-fns/locale';
+import { id, ptBR } from 'date-fns/locale';
 
-import { BarbershopService } from '@prisma/client';
+import { BarbershopService, Booking } from '@prisma/client';
 import { createBooking } from '@/actions/create-booking';
+import { getBookings } from '@/actions/get-bookings';
 
 import {
   Sheet,
@@ -21,6 +22,7 @@ import {
 import { Card, CardContent } from './ui/card';
 import { Separator } from './ui/separator';
 import { Calendar } from './ui/calendar';
+import { Skeleton } from './ui/skeleton';
 import { Button } from './ui/button';
 
 const TIME_LIST = [
@@ -44,6 +46,23 @@ const TIME_LIST = [
   '17:30',
 ];
 
+function getAvailableTimes(bookings: Array<Booking>) {
+  return TIME_LIST.filter((time) => {
+    const timeSplited = time.split(':');
+
+    const hours = Number(timeSplited[0]);
+    const minutes = Number(timeSplited[1]);
+
+    const hasBookingOnCurrentTime = bookings.some(
+      (booking) =>
+        booking.date.getHours() === hours &&
+        booking.date.getMinutes() === minutes,
+    );
+
+    return !hasBookingOnCurrentTime;
+  });
+}
+
 type DrawerService = PropsWithChildren & {
   data: Omit<BarbershopService, 'price'> & {
     price: string;
@@ -57,7 +76,11 @@ export function DrawerBooking({ children, data }: DrawerService) {
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>();
 
+  const [loading, setLoading] = useState<boolean>(false);
+  const [bookings, setBookings] = useState<Array<Booking>>([]);
+
   function handleSelectDate(date?: Date) {
+    setSelectedTime(undefined);
     setSelectedDate(date);
   }
 
@@ -97,11 +120,34 @@ export function DrawerBooking({ children, data }: DrawerService) {
     }
   }
 
+  useEffect(() => {
+    async function fetchBookings(date: Date) {
+      try {
+        setLoading(true);
+
+        const bkngs = await getBookings({ date, barbershopServiceId: data.id });
+
+        setBookings(bkngs);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (selectedDate) fetchBookings(selectedDate);
+  }, [selectedDate, data.id]);
+
+  const availableTimes = getAvailableTimes(bookings);
+
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
 
-      <SheetContent className="flex flex-col justify-start overflow-y-auto overflow-x-hidden p-0">
+      <SheetContent
+        aria-describedby={undefined}
+        className="flex flex-col justify-start overflow-y-auto overflow-x-hidden p-0"
+      >
         <SheetHeader className="p-6">
           <SheetTitle className="text-start">Fazer reserva</SheetTitle>
         </SheetHeader>
@@ -146,17 +192,26 @@ export function DrawerBooking({ children, data }: DrawerService) {
               <Separator />
 
               <div className="flex gap-3 overflow-x-auto p-6 [&::-webkit-scrollbar]:hidden">
-                {TIME_LIST.map((time) => (
-                  <Button
-                    key={time}
-                    size="sm"
-                    className="border"
-                    variant={time === selectedTime ? 'default' : 'outline'}
-                    onClick={() => handleSelectTime(time)}
-                  >
-                    {time}
-                  </Button>
-                ))}
+                {loading &&
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <Skeleton
+                      key={`time-skeleton-${idx}`}
+                      className="h-[36px] min-w-[63px]"
+                    />
+                  ))}
+
+                {!loading &&
+                  availableTimes.map((time) => (
+                    <Button
+                      key={time}
+                      size="sm"
+                      className="border"
+                      variant={time === selectedTime ? 'default' : 'outline'}
+                      onClick={() => handleSelectTime(time)}
+                    >
+                      {time}
+                    </Button>
+                  ))}
               </div>
             </>
           )}
