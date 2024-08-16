@@ -106,7 +106,6 @@ export function DrawerBooking({ children, data }: DrawerService) {
     try {
       await createBooking({
         barbershopServiceId: data.id,
-        userId: authData.user.id,
         date,
       });
 
