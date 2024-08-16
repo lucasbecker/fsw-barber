@@ -5,11 +5,18 @@ import { BarbershopService } from '@prisma/client';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 
+import { DrawerBooking } from './drawer-booking';
+
 type BarbershopServiceCardProps = {
-  data: BarbershopService;
+  data: BarbershopService & { barbershopName: string };
 };
 
 export function BarbershopServiceCard({ data }: BarbershopServiceCardProps) {
+  const price = data.price.toNumber().toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+
   return (
     <Card className="rounded-xl">
       <CardContent className="flex gap-3 p-3">
@@ -31,14 +38,11 @@ export function BarbershopServiceCard({ data }: BarbershopServiceCardProps) {
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="font-bold">
-              {data.price.toNumber().toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              })}
-            </span>
+            <span className="font-bold">{price}</span>
 
-            <Button variant="secondary">Reservar</Button>
+            <DrawerBooking data={{ ...data, price }}>
+              <Button variant="secondary">Reservar</Button>
+            </DrawerBooking>
           </div>
         </div>
       </CardContent>

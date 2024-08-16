@@ -83,7 +83,10 @@ export default async function Barbershop({ params: { id } }: BarbershopProps) {
         <h3>Serviços</h3>
 
         {barbershop.services.map((service) => (
-          <BarbershopServiceCard key={service.id} data={service} />
+          <BarbershopServiceCard
+            key={service.id}
+            data={{ ...service, barbershopName: barbershop.name }}
+          />
         ))}
       </section>
 
