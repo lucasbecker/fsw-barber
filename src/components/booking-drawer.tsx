@@ -25,6 +25,7 @@ import { Skeleton } from './ui/skeleton';
 import { Button } from './ui/button';
 
 import { BookingCardSummary } from './booking-summary-card';
+import { LoginDialog } from './login-dialog';
 
 const TIME_LIST = [
   '08:00',
@@ -88,6 +89,8 @@ export function BookingDrawer({ children, data }: BookingDrawerProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
 
+  const isAuthenticated = session.status === 'authenticated';
+
   function handleSelectDate(date?: Date) {
     setSelectedTime(undefined);
     setSelectedDate(date);
@@ -100,7 +103,7 @@ export function BookingDrawer({ children, data }: BookingDrawerProps) {
   async function handleCreateBooking() {
     if (!selectedDateAndTime) return;
 
-    if (!session) {
+    if (!isAuthenticated) {
       toast.warning('É necessário estar logado para fazer uma reserva!');
       return;
     }
@@ -112,6 +115,7 @@ export function BookingDrawer({ children, data }: BookingDrawerProps) {
       });
 
       setOpen(false);
+
       toast.success('Reserva criada com sucesso!', {
         action: {
           label: 'Ver Agendamento',
@@ -151,7 +155,7 @@ export function BookingDrawer({ children, data }: BookingDrawerProps) {
       }
     }
 
-    if (selectedDate) fetchBookings(selectedDate);
+    if (selectedDate && session?.data) fetchBookings(selectedDate);
   }, [selectedDate, data.id, session?.data]);
 
   const selectedDateAndTime = useMemo(() => {
@@ -168,8 +172,10 @@ export function BookingDrawer({ children, data }: BookingDrawerProps) {
   }, [selectedDate, selectedTime]);
 
   const availableTimes = useMemo(
-    () => selectedDate && getAvailableTimes({ bookings, date: selectedDate }),
-    [bookings, selectedDate],
+    () =>
+      selectedDateAndTime &&
+      getAvailableTimes({ bookings, date: selectedDateAndTime }),
+    [bookings, selectedDateAndTime],
   );
 
   return (
@@ -186,95 +192,115 @@ export function BookingDrawer({ children, data }: BookingDrawerProps) {
 
         <Separator />
 
-        <div className="px-5 py-6">
-          <Calendar
-            mode="single"
-            className="p-0"
-            locale={ptBR}
-            fromDate={new Date()}
-            selected={selectedDate}
-            onSelect={handleSelectDate}
-            styles={{
-              head_cell: {
-                width: '100%',
-                textTransform: 'capitalize',
-              },
-              cell: {
-                width: '100%',
-              },
-              button: {
-                width: '100%',
-              },
-              nav_button_previous: {
-                width: '32px',
-                height: '32px',
-              },
-              nav_button_next: {
-                width: '32px',
-                height: '32px',
-              },
-              caption: { textTransform: 'capitalize' },
-            }}
-          />
-        </div>
+        {isAuthenticated ? (
+          <>
+            <div className="px-5 py-6">
+              <Calendar
+                mode="single"
+                className="p-0"
+                locale={ptBR}
+                fromDate={new Date()}
+                selected={selectedDate}
+                onSelect={handleSelectDate}
+                styles={{
+                  head_cell: {
+                    width: '100%',
+                    textTransform: 'capitalize',
+                  },
+                  cell: {
+                    width: '100%',
+                  },
+                  button: {
+                    width: '100%',
+                  },
+                  nav_button_previous: {
+                    width: '32px',
+                    height: '32px',
+                  },
+                  nav_button_next: {
+                    width: '32px',
+                    height: '32px',
+                  },
+                  caption: { textTransform: 'capitalize' },
+                }}
+              />
+            </div>
 
-        <div className="flex-1">
-          {selectedDate && (
-            <>
-              <Separator />
+            <div className="flex-1">
+              {selectedDate && (
+                <>
+                  <Separator />
 
-              <div className="flex gap-3 overflow-x-auto px-5 py-6 [&::-webkit-scrollbar]:hidden">
-                {loading &&
-                  Array.from({ length: 5 }).map((_, idx) => (
-                    <Skeleton
-                      key={`time-skeleton-${idx}`}
-                      className="h-[36px] min-w-[63px]"
+                  <div className="flex gap-3 overflow-x-auto px-5 py-6 [&::-webkit-scrollbar]:hidden">
+                    {loading &&
+                      Array.from({ length: 5 }).map((_, idx) => (
+                        <Skeleton
+                          key={`time-skeleton-${idx}`}
+                          className="h-[36px] min-w-[63px]"
+                        />
+                      ))}
+
+                    {!loading &&
+                      availableTimes?.map((time) => (
+                        <Button
+                          key={time}
+                          size="sm"
+                          className="rounded-lg border"
+                          variant={
+                            time === selectedTime ? 'default' : 'outline'
+                          }
+                          onClick={() => handleSelectTime(time)}
+                        >
+                          {time}
+                        </Button>
+                      ))}
+
+                    {!loading && !availableTimes?.length && (
+                      <p>Nenhum horário disponível.</p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {selectedDateAndTime && (
+                <>
+                  <Separator />
+
+                  <div className="px-5 py-6">
+                    <BookingCardSummary
+                      barbershopService={data}
+                      barbershop={{ name: data.barbershopName }}
+                      date={selectedDateAndTime}
                     />
-                  ))}
-
-                {!loading &&
-                  availableTimes?.map((time) => (
-                    <Button
-                      key={time}
-                      size="sm"
-                      className="rounded-lg border"
-                      variant={time === selectedTime ? 'default' : 'outline'}
-                      onClick={() => handleSelectTime(time)}
-                    >
-                      {time}
-                    </Button>
-                  ))}
-
-                {!loading && !availableTimes?.length && (
-                  <p>Nenhum horário disponível.</p>
-                )}
-              </div>
-            </>
-          )}
-
-          {selectedDateAndTime && (
-            <>
-              <Separator />
-
-              <div className="px-5 py-6">
-                <BookingCardSummary
-                  barbershopService={data}
-                  barbershop={{ name: data.barbershopName }}
-                  date={selectedDateAndTime}
-                />
-              </div>
-            </>
-          )}
-        </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 px-5 py-6">
+            <p className="text-muted-foreground">
+              Você precisa estar logado para fazer reservas.
+            </p>
+          </div>
+        )}
 
         <SheetFooter className="p-6">
-          <Button
-            disabled={!selectedDate || !selectedTime}
-            onClick={handleCreateBooking}
-            className="rounded-lg"
-          >
-            Confirmar
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              disabled={!selectedDate || !selectedTime}
+              onClick={handleCreateBooking}
+              className="rounded-lg"
+            >
+              Confirmar
+            </Button>
+          ) : (
+            <LoginDialog>
+              <Button variant="outline" className="rounded-lg">
+                Fazer login
+              </Button>
+            </LoginDialog>
+          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>

@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/prisma';
 
+import { Button } from '@/components/ui/button';
+
+import { LoginDialog } from '@/components/login-dialog';
 import { BookingCard } from '@/components/booking-card';
 
 export default async function Bookings() {
@@ -44,9 +47,17 @@ export default async function Bookings() {
         <h1 className="text-xl font-bold">Agendamentos</h1>
 
         {!session && (
-          <p className="text-muted-foreground">
-            Você precisa estar logado para ver os agendamentos.
-          </p>
+          <>
+            <p className="text-muted-foreground">
+              Você precisa estar logado para ver os agendamentos.
+            </p>
+
+            <LoginDialog>
+              <Button variant="outline" className="rounded-lg">
+                Fazer login
+              </Button>
+            </LoginDialog>
+          </>
         )}
 
         {session && !nextBookings?.length && !oldBookings?.length && (

@@ -1,9 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
-import { PropsWithChildren } from 'react';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import Link from 'next/link';
+
 import {
   CalendarIcon,
   HomeIcon,
@@ -11,6 +10,8 @@ import {
   LogOutIcon,
   ScissorsIcon,
 } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
+import { PropsWithChildren } from 'react';
 
 import { QUICK_SEARCH_OPTIONS } from '@/constants/quick-search';
 
@@ -22,27 +23,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from './ui/sheet';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTrigger,
-} from './ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
 
+import { LoginDialog } from './login-dialog';
+
 export function Drawer({ children }: PropsWithChildren) {
   const { data } = useSession();
-
-  async function handleLoginWithGoogle() {
-    await signIn('google');
-  }
-
-  async function handleLogout() {
-    await signOut();
-  }
 
   return (
     <Sheet>
@@ -76,25 +64,11 @@ export function Drawer({ children }: PropsWithChildren) {
             <div className="flex items-center justify-between">
               <p className="text-lg font-bold">Olá, faça seu login!</p>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button size="icon">
-                    <LogInIcon className="size-5" />
-                  </Button>
-                </DialogTrigger>
-
-                <DialogContent className="w-10/12 rounded-xl">
-                  <DialogHeader>Faça login na plataforma</DialogHeader>
-
-                  <DialogDescription className="text-center">
-                    Conecte-se usando sua conta do Google.
-                  </DialogDescription>
-
-                  <Button className="font-bold" onClick={handleLoginWithGoogle}>
-                    Google
-                  </Button>
-                </DialogContent>
-              </Dialog>
+              <LoginDialog>
+                <Button size="icon">
+                  <LogInIcon className="size-5" />
+                </Button>
+              </LoginDialog>
             </div>
           )}
 
@@ -174,7 +148,7 @@ export function Drawer({ children }: PropsWithChildren) {
               <Separator />
 
               <Button
-                onClick={handleLogout}
+                onClick={() => signOut()}
                 className="justify-start gap-2"
                 variant="ghost"
                 size="lg"
