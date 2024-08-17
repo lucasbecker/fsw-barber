@@ -1,19 +1,35 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { getServerSession } from 'next-auth';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+import { authOptions } from '@/lib/auth';
+import { db } from '@/lib/prisma';
+
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 import { QUICK_SEARCH_OPTIONS } from '@/constants/quick-search';
 import { BarbershopCard } from '@/components/barbershop-card';
+import { BookingCard } from '@/components/booking-card';
 import { Search } from '@/components/search';
-import { db } from '@/lib/prisma';
 
 export default async function Home() {
+  const session = await getServerSession(authOptions);
+
   const barbershops = await db.barbershop.findMany({});
+
+  const booking = session
+    ? await db.booking.findFirst({
+        where: {
+          userId: session.user.id,
+          date: { gte: new Date() },
+        },
+        include: { barbershopService: { include: { barbershop: true } } },
+        orderBy: { date: 'asc' },
+      })
+    : null;
 
   return (
     <main>
@@ -21,8 +37,12 @@ export default async function Home() {
         <h1 className="sr-only">FSW Barber</h1>
 
         <div className="px-5">
-          <h2 className="text-xl font-bold">Olá, Lucas!</h2>
-          <span className="text-muted-foreground">Segunda, 5 de Agosto</span>
+          <h2 className="text-xl font-bold">
+            Olá, {session?.user.name || 'Visitante'}!
+          </h2>
+          <span className="text-muted-foreground">
+            {format(new Date(), "EEEE, dd 'de' MMMM", { locale: ptBR })}
+          </span>
         </div>
 
         <Search className="px-5" />
@@ -62,38 +82,13 @@ export default async function Home() {
         </div>
       </section>
 
-      <section>
-        <h3 className="heading">Agendamentos</h3>
+      {booking && (
+        <section>
+          <h3 className="heading">Próximo Agendamento</h3>
 
-        <Card>
-          <CardContent className="flex p-0">
-            <div className="flex flex-1 flex-col gap-2 p-5">
-              <Badge className="w-fit" variant="secondary">
-                Confirmado
-              </Badge>
-
-              <h6 className="font-semibold">Corte de Cabelo</h6>
-
-              <div className="flex items-center gap-2">
-                <Avatar className="size-6">
-                  <AvatarImage src="/banner.png" />
-                  <AvatarFallback className="text-xs">BF</AvatarFallback>
-                </Avatar>
-
-                <span className="text-sm">Babearia FSW</span>
-              </div>
-            </div>
-
-            <Separator orientation="vertical" className="h-auto" />
-
-            <div className="flex flex-col items-center justify-center p-5">
-              <span className="text-sm">Agosto</span>
-              <span className="text-2xl">05</span>
-              <span className="text-sm">09:45</span>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+          <BookingCard data={booking} />
+        </section>
+      )}
 
       <section className="px-0">
         <h3 className="heading px-5">Recomendados</h3>

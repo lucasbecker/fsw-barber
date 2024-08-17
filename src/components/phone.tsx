@@ -27,7 +27,12 @@ export function Phone({ children }: PhoneProps) {
         {children}
       </a>
 
-      <Button variant="outline" size="sm" onClick={handleCopy}>
+      <Button
+        onClick={handleCopy}
+        className="rounded-lg"
+        variant="outline"
+        size="sm"
+      >
         Copiar
       </Button>
     </div>

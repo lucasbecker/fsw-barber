@@ -5,7 +5,7 @@ import { BarbershopService } from '@prisma/client';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 
-import { DrawerBooking } from './drawer-booking';
+import { BookingDrawer } from './booking-drawer';
 
 type BarbershopServiceCardProps = {
   data: BarbershopService & { barbershopName: string };
@@ -40,9 +40,11 @@ export function BarbershopServiceCard({ data }: BarbershopServiceCardProps) {
           <div className="flex items-center justify-between">
             <span className="font-bold">{price}</span>
 
-            <DrawerBooking data={{ ...data, price }}>
-              <Button variant="secondary">Reservar</Button>
-            </DrawerBooking>
+            <BookingDrawer data={{ ...data, price }}>
+              <Button variant="secondary" className="rounded-lg">
+                Reservar
+              </Button>
+            </BookingDrawer>
           </div>
         </div>
       </CardContent>

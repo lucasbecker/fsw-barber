@@ -1,10 +1,11 @@
 'use client';
 
-import { PropsWithChildren, useEffect, useState } from 'react';
-import { format, set } from 'date-fns';
+import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import { isPast, isToday, set } from 'date-fns';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { id, ptBR } from 'date-fns/locale';
+import { ptBR } from 'date-fns/locale';
 
 import { BarbershopService, Booking } from '@prisma/client';
 import { createBooking } from '@/actions/create-booking';
@@ -12,18 +13,18 @@ import { getBookings } from '@/actions/get-bookings';
 
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from './ui/sheet';
-import { Card, CardContent } from './ui/card';
 import { Separator } from './ui/separator';
 import { Calendar } from './ui/calendar';
 import { Skeleton } from './ui/skeleton';
 import { Button } from './ui/button';
+
+import { BookingCardSummary } from './booking-summary-card';
 
 const TIME_LIST = [
   '08:00',
@@ -46,12 +47,18 @@ const TIME_LIST = [
   '17:30',
 ];
 
-function getAvailableTimes(bookings: Array<Booking>) {
+type GetAvailableTimesParams = { bookings: Array<Booking>; date: Date };
+
+function getAvailableTimes({ bookings, date }: GetAvailableTimesParams) {
   return TIME_LIST.filter((time) => {
     const timeSplited = time.split(':');
 
     const hours = Number(timeSplited[0]);
     const minutes = Number(timeSplited[1]);
+
+    const timeInPast = isPast(set(new Date(), { hours, minutes }));
+
+    if (isToday(date) && timeInPast) return false;
 
     const hasBookingOnCurrentTime = bookings.some(
       (booking) =>
@@ -63,21 +70,23 @@ function getAvailableTimes(bookings: Array<Booking>) {
   });
 }
 
-type DrawerService = PropsWithChildren & {
+type BookingDrawerProps = PropsWithChildren & {
   data: Omit<BarbershopService, 'price'> & {
     price: string;
     barbershopName: string;
   };
 };
 
-export function DrawerBooking({ children, data }: DrawerService) {
-  const { data: authData } = useSession();
+export function BookingDrawer({ children, data }: BookingDrawerProps) {
+  const session = useSession();
+  const router = useRouter();
 
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>();
 
-  const [loading, setLoading] = useState<boolean>(false);
   const [bookings, setBookings] = useState<Array<Booking>>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
 
   function handleSelectDate(date?: Date) {
     setSelectedTime(undefined);
@@ -89,27 +98,26 @@ export function DrawerBooking({ children, data }: DrawerService) {
   }
 
   async function handleCreateBooking() {
-    if (!selectedDate || !selectedTime) return;
+    if (!selectedDateAndTime) return;
 
-    if (!authData?.user) {
+    if (!session) {
       toast.warning('É necessário estar logado para fazer uma reserva!');
       return;
     }
 
-    const timeSplited = selectedTime.split(':');
-
-    const hours = Number(timeSplited[0]);
-    const minutes = Number(timeSplited[1]);
-
-    const date = set(selectedDate, { hours, minutes });
-
     try {
       await createBooking({
         barbershopServiceId: data.id,
-        date,
+        date: selectedDateAndTime,
       });
 
-      toast.success('Reserva criada com sucesso!');
+      setOpen(false);
+      toast.success('Reserva criada com sucesso!', {
+        action: {
+          label: 'Ver Agendamento',
+          onClick: () => router.push('/bookings'),
+        },
+      });
     } catch (error) {
       console.log(error);
       toast.error('Erro ao criar reserva!');
@@ -124,9 +132,18 @@ export function DrawerBooking({ children, data }: DrawerService) {
       try {
         setLoading(true);
 
-        const bkngs = await getBookings({ date, barbershopServiceId: data.id });
+        const [serviceBookings, userBookins] = await Promise.all([
+          getBookings({
+            date,
+            barbershopServiceId: data.id,
+          }),
+          getBookings({
+            date,
+            userId: session.data?.user.id,
+          }),
+        ]);
 
-        setBookings(bkngs);
+        setBookings([...serviceBookings, ...userBookins]);
       } catch (error) {
         console.log(error);
       } finally {
@@ -135,25 +152,41 @@ export function DrawerBooking({ children, data }: DrawerService) {
     }
 
     if (selectedDate) fetchBookings(selectedDate);
-  }, [selectedDate, data.id]);
+  }, [selectedDate, data.id, session?.data]);
 
-  const availableTimes = getAvailableTimes(bookings);
+  const selectedDateAndTime = useMemo(() => {
+    if (!selectedDate || !selectedTime) return;
+
+    const timeSplited = selectedTime.split(':');
+
+    const hours = Number(timeSplited[0]);
+    const minutes = Number(timeSplited[1]);
+
+    const date = set(selectedDate, { hours, minutes });
+
+    return date;
+  }, [selectedDate, selectedTime]);
+
+  const availableTimes = useMemo(
+    () => selectedDate && getAvailableTimes({ bookings, date: selectedDate }),
+    [bookings, selectedDate],
+  );
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
 
       <SheetContent
         aria-describedby={undefined}
-        className="flex flex-col justify-start overflow-y-auto overflow-x-hidden p-0"
+        className="flex flex-col justify-start gap-0 overflow-y-auto overflow-x-hidden p-0"
       >
-        <SheetHeader className="p-6">
+        <SheetHeader className="px-5 py-6">
           <SheetTitle className="text-start">Fazer reserva</SheetTitle>
         </SheetHeader>
 
         <Separator />
 
-        <div className="p-6">
+        <div className="px-5 py-6">
           <Calendar
             mode="single"
             className="p-0"
@@ -190,7 +223,7 @@ export function DrawerBooking({ children, data }: DrawerService) {
             <>
               <Separator />
 
-              <div className="flex gap-3 overflow-x-auto p-6 [&::-webkit-scrollbar]:hidden">
+              <div className="flex gap-3 overflow-x-auto px-5 py-6 [&::-webkit-scrollbar]:hidden">
                 {loading &&
                   Array.from({ length: 5 }).map((_, idx) => (
                     <Skeleton
@@ -200,67 +233,48 @@ export function DrawerBooking({ children, data }: DrawerService) {
                   ))}
 
                 {!loading &&
-                  availableTimes.map((time) => (
+                  availableTimes?.map((time) => (
                     <Button
                       key={time}
                       size="sm"
-                      className="border"
+                      className="rounded-lg border"
                       variant={time === selectedTime ? 'default' : 'outline'}
                       onClick={() => handleSelectTime(time)}
                     >
                       {time}
                     </Button>
                   ))}
+
+                {!loading && !availableTimes?.length && (
+                  <p>Nenhum horário disponível.</p>
+                )}
               </div>
             </>
           )}
 
-          {selectedDate && selectedTime && (
+          {selectedDateAndTime && (
             <>
               <Separator />
 
-              <div className="p-6">
-                <Card className="p-0">
-                  <CardContent className="flex flex-col gap-3 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <h6 className="font-bold">{data.name}</h6>
-                      <span className="text-end text-sm font-bold">
-                        {data.price}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 text-sm">
-                      <span className="text-muted-foreground">Data</span>
-                      <p className="text-end">
-                        {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 text-sm">
-                      <span className="text-muted-foreground">Horário</span>
-                      <p className="text-end">{selectedTime}</p>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 text-sm">
-                      <span className="text-muted-foreground">Barbearia</span>
-                      <p className="text-end">{data.barbershopName}</p>
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="px-5 py-6">
+                <BookingCardSummary
+                  barbershopService={data}
+                  barbershop={{ name: data.barbershopName }}
+                  date={selectedDateAndTime}
+                />
               </div>
             </>
           )}
         </div>
 
         <SheetFooter className="p-6">
-          <SheetClose asChild>
-            <Button
-              disabled={!selectedDate || !selectedTime}
-              onClick={handleCreateBooking}
-            >
-              Confirmar
-            </Button>
-          </SheetClose>
+          <Button
+            disabled={!selectedDate || !selectedTime}
+            onClick={handleCreateBooking}
+            className="rounded-lg"
+          >
+            Confirmar
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

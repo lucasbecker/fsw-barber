@@ -115,10 +115,19 @@ export function Drawer({ children }: PropsWithChildren) {
               </Button>
             </SheetClose>
 
-            <Button className="justify-start gap-2" variant="ghost" size="lg">
-              <CalendarIcon className="size-5" />
-              Agendamentos
-            </Button>
+            <SheetClose asChild>
+              <Button
+                asChild
+                size="lg"
+                variant="ghost"
+                className="justify-start gap-2"
+              >
+                <Link href="/bookings">
+                  <CalendarIcon className="size-5" />
+                  Agendamentos
+                </Link>
+              </Button>
+            </SheetClose>
 
             <SheetClose asChild>
               <Button
