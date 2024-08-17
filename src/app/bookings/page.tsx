@@ -61,7 +61,7 @@ export default async function Bookings() {
         )}
 
         {session && !nextBookings?.length && !oldBookings?.length && (
-          <p className="font-thin">Nenhum encontrado.</p>
+          <p className="font-thin">Nenhum agendamento encontrado.</p>
         )}
       </section>
 

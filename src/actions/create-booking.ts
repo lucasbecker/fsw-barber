@@ -10,13 +10,13 @@ type CreateBookingParams = {
 };
 
 export async function createBooking(params: CreateBookingParams) {
-  const data = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
 
-  if (!data) throw new Error('Usuário não autenticado!');
+  if (!session) throw new Error('Usuário não autenticado!');
 
   return await db.booking.create({
     data: {
-      userId: data.user.id,
+      userId: session.user.id,
       ...params,
     },
   });

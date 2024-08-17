@@ -30,7 +30,9 @@ import { Button } from './ui/button';
 import { LoginDialog } from './login-dialog';
 
 export function Drawer({ children }: PropsWithChildren) {
-  const { data } = useSession();
+  const { data: session, status } = useSession();
+
+  const isAuthenticated = status === 'authenticated';
 
   return (
     <Sheet>
@@ -45,18 +47,18 @@ export function Drawer({ children }: PropsWithChildren) {
         </SheetHeader>
 
         <div className="flex flex-col gap-6 py-6">
-          {data?.user ? (
+          {isAuthenticated ? (
             <div className="flex items-center gap-3">
               <Avatar className="size-12 border-2 border-primary">
-                <AvatarImage src={data.user.image ?? undefined} />
-                <AvatarFallback>{data.user.name}</AvatarFallback>
+                <AvatarImage src={session.user.image ?? undefined} />
+                <AvatarFallback>{session.user.name}</AvatarFallback>
               </Avatar>
 
               <div>
-                <p className="font-bold">{data.user.name}</p>
+                <p className="font-bold">{session.user.name}</p>
 
                 <span className="truncate text-sm text-muted-foreground">
-                  {data.user.email}
+                  {session.user.email}
                 </span>
               </div>
             </div>
@@ -143,7 +145,7 @@ export function Drawer({ children }: PropsWithChildren) {
             ))}
           </div>
 
-          {data?.user && (
+          {isAuthenticated && (
             <>
               <Separator />
 

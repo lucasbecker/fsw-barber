@@ -36,7 +36,7 @@ export default async function Barbershops({ searchParams }: BarbershopsProps) {
   return (
     <main>
       <section className="pb-0">
-        <h1 className="sr-only">Barbearias</h1>
+        <h1 className="text-xl font-bold">Barbeiros</h1>
 
         <Search />
       </section>
@@ -52,6 +52,10 @@ export default async function Barbershops({ searchParams }: BarbershopsProps) {
           {barbershops.map((barbershop) => (
             <BarbershopCard key={barbershop.id} data={barbershop} />
           ))}
+
+          {!barbershops.length && (
+            <p className="font-thin">Nenhum barbeiro encontrado.</p>
+          )}
         </div>
       </section>
     </main>
