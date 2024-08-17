@@ -15,8 +15,6 @@ export function Header() {
 
   return (
     <header className="flex items-center justify-between border-b p-5">
-      <h1 className="sr-only">FSW Barber</h1>
-
       <Link href="/" title="FSW Baber">
         <Logo height={20} width={120} />
       </Link>

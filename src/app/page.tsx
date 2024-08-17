@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,7 +11,6 @@ import { QUICK_SEARCH_OPTIONS } from '@/constants/quick-search';
 import { BarbershopCard } from '@/components/barbershop-card';
 import { Search } from '@/components/search';
 import { db } from '@/lib/prisma';
-import Link from 'next/link';
 
 export default async function Home() {
   const barbershops = await db.barbershop.findMany({});
@@ -18,6 +18,8 @@ export default async function Home() {
   return (
     <main>
       <section className="gap-6 px-0">
+        <h1 className="sr-only">FSW Barber</h1>
+
         <div className="px-5">
           <h2 className="text-xl font-bold">Olá, Lucas!</h2>
           <span className="text-muted-foreground">Segunda, 5 de Agosto</span>
@@ -61,7 +63,7 @@ export default async function Home() {
       </section>
 
       <section>
-        <h3>Agendamentos</h3>
+        <h3 className="heading">Agendamentos</h3>
 
         <Card>
           <CardContent className="flex p-0">
@@ -94,7 +96,7 @@ export default async function Home() {
       </section>
 
       <section className="px-0">
-        <h3 className="px-5">Recomendados</h3>
+        <h3 className="heading px-5">Recomendados</h3>
 
         <div className="flex gap-4 overflow-auto px-5 [&::-webkit-scrollbar]:hidden">
           {barbershops.map((barbershop) => (
@@ -104,7 +106,7 @@ export default async function Home() {
       </section>
 
       <section className="px-0">
-        <h3 className="px-5">Populares</h3>
+        <h3 className="heading px-5">Populares</h3>
 
         <div className="flex gap-4 overflow-auto px-5 [&::-webkit-scrollbar]:hidden">
           {barbershops.map((barbershop) => (

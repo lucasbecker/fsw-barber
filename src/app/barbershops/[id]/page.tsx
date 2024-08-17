@@ -72,7 +72,7 @@ export default async function Barbershop({ params: { id } }: BarbershopProps) {
       <Separator />
 
       <section>
-        <h3>Sobre nós</h3>
+        <h3 className="heading">Sobre nós</h3>
 
         <p className="text-justify text-sm">{barbershop.description}</p>
       </section>
@@ -80,7 +80,7 @@ export default async function Barbershop({ params: { id } }: BarbershopProps) {
       <Separator />
 
       <section>
-        <h3>Serviços</h3>
+        <h3 className="heading">Serviços</h3>
 
         {barbershop.services.map((service) => (
           <BarbershopServiceCard
@@ -93,7 +93,7 @@ export default async function Barbershop({ params: { id } }: BarbershopProps) {
       <Separator />
 
       <section>
-        <h3>Contato</h3>
+        <h3 className="heading">Contato</h3>
 
         {barbershop.phones.map((phone, index) => (
           <Phone key={phone + '-' + index}>{phone}</Phone>

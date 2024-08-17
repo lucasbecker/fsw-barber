@@ -36,15 +36,17 @@ export default async function Barbershops({ searchParams }: BarbershopsProps) {
   return (
     <main>
       <section className="pb-0">
+        <h1 className="sr-only">Barbearias</h1>
+
         <Search />
       </section>
 
       <section>
-        <h3>
+        <h2 className="heading">
           {searchParams.search
             ? `Resultados para "${searchParams.search}"`
             : 'Todos os resultados'}
-        </h3>
+        </h2>
 
         <div className="grid grid-cols-2 gap-4">
           {barbershops.map((barbershop) => (
