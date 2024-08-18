@@ -70,7 +70,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section>
+      <section className="sm:hidden">
         <div className="relative h-40 w-full overflow-hidden rounded-lg">
           <Image
             alt="Agende nos melhores com FSW Barber"

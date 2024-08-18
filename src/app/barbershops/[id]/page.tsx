@@ -24,7 +24,7 @@ export default async function Barbershop({ params: { id } }: BarbershopProps) {
 
   return (
     <main>
-      <header className="relative aspect-video w-full">
+      <header className="relative aspect-video w-full sm:aspect-auto sm:h-[33vh]">
         <Image
           fill
           alt={barbershop.name}
@@ -82,12 +82,14 @@ export default async function Barbershop({ params: { id } }: BarbershopProps) {
       <section>
         <h3 className="heading">Serviços</h3>
 
-        {barbershop.services.map((service) => (
-          <BarbershopServiceCard
-            key={service.id}
-            data={{ ...service, barbershopName: barbershop.name }}
-          />
-        ))}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {barbershop.services.map((service) => (
+            <BarbershopServiceCard
+              key={service.id}
+              data={{ ...service, barbershopName: barbershop.name }}
+            />
+          ))}
+        </div>
       </section>
 
       <Separator />

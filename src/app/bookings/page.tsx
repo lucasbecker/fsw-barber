@@ -69,9 +69,11 @@ export default async function Bookings() {
         <section>
           <h2 className="heading">Próximos</h2>
 
-          {nextBookings.map((booking) => (
-            <BookingCard key={booking.id} data={booking} />
-          ))}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {nextBookings.map((booking) => (
+              <BookingCard key={booking.id} data={booking} />
+            ))}
+          </div>
         </section>
       )}
 
@@ -79,9 +81,11 @@ export default async function Bookings() {
         <section>
           <h2 className="heading">Finalizados</h2>
 
-          {oldBookings.map((booking) => (
-            <BookingCard key={booking.id} data={booking} />
-          ))}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {oldBookings.map((booking) => (
+              <BookingCard key={booking.id} data={booking} />
+            ))}
+          </div>
         </section>
       )}
     </main>

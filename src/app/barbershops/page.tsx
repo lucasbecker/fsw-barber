@@ -48,7 +48,7 @@ export default async function Barbershops({ searchParams }: BarbershopsProps) {
             : 'Todos os resultados'}
         </h2>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6">
           {barbershops.map((barbershop) => (
             <BarbershopCard key={barbershop.id} data={barbershop} />
           ))}
